@@ -1,6 +1,7 @@
 #pragma once
 #include <string_view>
 #include <string>
+#include <wrl/client.h>
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -20,9 +21,9 @@ public:
 	auto Bind(ID3D11DeviceContext* context) -> void;
 
 private:
-    ID3D11VertexShader* m_VertexShader;
-    ID3D11PixelShader* m_PixelShader;
-    ID3D11InputLayout* m_InputLayout;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_VertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_PixelShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_InputLayout;
 	std::wstring m_FilePath;
 
 	auto InitializeVertexShader(ID3D11Device* device) -> void;

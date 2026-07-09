@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <wrl/client.h>
 #include "Types.h"
 
 struct ID3D11Device;
@@ -16,9 +17,9 @@ public:
 	VertexBuffer(const VertexBuffer&) = delete;
 	VertexBuffer& operator=(const VertexBuffer&) = delete;
 	
-	auto GetRawBuffer() -> ID3D11Buffer* const { return m_Buffer; }
+	auto GetRawBuffer() const -> ID3D11Buffer* { return m_Buffer.Get(); }
 
 private:
-	ID3D11Buffer* m_Buffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_Buffer;
 };
 

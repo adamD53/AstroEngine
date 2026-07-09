@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string_view>
+#include <wrl/client.h>
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -21,9 +22,9 @@ public:
 
 private:
 	int32_t m_Width, m_Height, m_Channels;
-	ID3D11Texture2D* m_Texture;
-    ID3D11ShaderResourceView* m_ResourceView;
-    ID3D11SamplerState* m_SamplerState;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_Texture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_ResourceView;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_SamplerState;
 
 	auto InitializeTexture(ID3D11Device* device, const std::string_view filePath) -> void;
 	auto InitializeSampler(ID3D11Device* device) -> void;

@@ -5,12 +5,13 @@
 #include "InstanceBuffer.h"
 #include "CoreUtils.h"
 
-InstanceBuffer::InstanceBuffer(const std::vector<Graphics::InstanceData>& instances, uint32_t maxInstances, 
-    ID3D11Device* device, unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag)
-    : m_Buffer(nullptr)
+InstanceBuffer::InstanceBuffer(const std::vector<Graphics::InstanceData>& instances, ID3D11Device* device,
+    unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag)
 {
+    Utils::core_assert(instances.empty() == false, "DirectX Instance Buffer got an empty instances data.");
+    
     D3D11_BUFFER_DESC instanceBufferDesc = {
-        .ByteWidth = sizeof(Graphics::InstanceData) * maxInstances,
+        .ByteWidth = static_cast<UINT>(sizeof(Graphics::InstanceData) * instances.size()),
         .Usage = static_cast<D3D11_USAGE>(usage),
         .BindFlags = bindFlag,
         .CPUAccessFlags = cpuFlag
@@ -23,7 +24,4 @@ InstanceBuffer::InstanceBuffer(const std::vector<Graphics::InstanceData>& instan
     Utils::core_assert(SUCCEEDED(hr), "DirectX Instance Buffer failed to create.");
 }
 
-InstanceBuffer::~InstanceBuffer()
-{
-	if (m_Buffer) m_Buffer->Release();
-}
+InstanceBuffer::~InstanceBuffer() = default;

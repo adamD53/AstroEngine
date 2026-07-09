@@ -6,6 +6,8 @@
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
+#include <wrl/client.h>
+
 class VertexBuffer;
 class IndexBuffer;
 class InstanceBuffer;
@@ -28,6 +30,6 @@ private:
 	std::unique_ptr<VertexBuffer> m_VertexBuffer;
 	std::unique_ptr<IndexBuffer> m_IndexBuffer;
 	std::unique_ptr<InstanceBuffer> m_InstanceBuffer;
-	ID3D11Buffer* m_ConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_ConstantBuffer;
 };
 

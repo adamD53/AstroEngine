@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstdint>
+#include <wrl/client.h>
 #include "Types.h"
 
 struct ID3D11Device;
@@ -9,7 +10,7 @@ struct ID3D11Buffer;
 class InstanceBuffer
 {
 public:
-	InstanceBuffer(const std::vector<Graphics::InstanceData>& instances, uint32_t maxInstances, ID3D11Device* device,
+	InstanceBuffer(const std::vector<Graphics::InstanceData>& instances, ID3D11Device* device,
 		unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag);
 	
 	~InstanceBuffer();
@@ -17,9 +18,9 @@ public:
 	InstanceBuffer(const InstanceBuffer&) = delete;
 	InstanceBuffer& operator=(const InstanceBuffer&) = delete;
 
-	auto GetRawBuffer() -> ID3D11Buffer* const { return m_Buffer; }
+	auto GetRawBuffer() const -> ID3D11Buffer* { return m_Buffer.Get(); }
 
 private:
-	ID3D11Buffer* m_Buffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_Buffer;
 };
 

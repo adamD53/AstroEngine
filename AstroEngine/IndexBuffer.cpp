@@ -7,8 +7,9 @@
 
 IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices, ID3D11Device* device, 
     unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag)
-    : m_Buffer(nullptr)
 {
+    Utils::core_assert(indices.empty() == false, "DirectX Index Buffer got an empty indices data.");
+    
     D3D11_BUFFER_DESC indexBufferDesc = {
         .ByteWidth = static_cast<UINT>(sizeof(unsigned int) * indices.size()),
         .Usage = static_cast<D3D11_USAGE>(usage),
@@ -23,7 +24,4 @@ IndexBuffer::IndexBuffer(const std::vector<unsigned int>& indices, ID3D11Device*
     Utils::core_assert(SUCCEEDED(hr), "DirectX Index Buffer failed to create.");
 }
 
-IndexBuffer::~IndexBuffer()
-{
-    if (m_Buffer) m_Buffer->Release();
-}
+IndexBuffer::~IndexBuffer() = default;

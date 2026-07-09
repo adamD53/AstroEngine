@@ -7,8 +7,9 @@
 
 VertexBuffer::VertexBuffer(const std::vector<Graphics::Vertex>& vertices, ID3D11Device* device, 
     unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag)
-    : m_Buffer(nullptr)
 {
+    Utils::core_assert(vertices.empty() == false, "DirectX Vertex Buffer got an empty vertices data.");
+
     D3D11_BUFFER_DESC vertexBufferDesc = {
         .ByteWidth = static_cast<UINT>(sizeof(Graphics::Vertex) * vertices.size()),
         .Usage = static_cast<D3D11_USAGE>(usage),
@@ -23,7 +24,4 @@ VertexBuffer::VertexBuffer(const std::vector<Graphics::Vertex>& vertices, ID3D11
     Utils::core_assert(SUCCEEDED(hr), "DirectX Vertex Buffer failed to create.");
 }
 
-VertexBuffer::~VertexBuffer()
-{
-	if (m_Buffer) m_Buffer->Release();
-}
+VertexBuffer::~VertexBuffer() = default;

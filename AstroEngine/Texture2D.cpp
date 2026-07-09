@@ -14,12 +14,7 @@ Texture2D::Texture2D(ID3D11Device* device, const std::string_view filePath)
     InitializeResourceView(device);
 }
 
-Texture2D::~Texture2D()
-{
-    if (m_Texture) m_Texture->Release();
-    if (m_ResourceView) m_ResourceView->Release();
-    if (m_SamplerState) m_SamplerState->Release();
-}
+Texture2D::~Texture2D() = default;
 
 auto Texture2D::InitializeTexture(ID3D11Device* device, const std::string_view filePath) -> void
 {
@@ -76,15 +71,15 @@ auto Texture2D::InitializeResourceView(ID3D11Device* device) -> void
         }
     };
     
-    HRESULT hr = device->CreateShaderResourceView(m_Texture, &resourceViewDesc, &m_ResourceView);
+    HRESULT hr = device->CreateShaderResourceView(m_Texture.Get(), &resourceViewDesc, &m_ResourceView);
     Utils::core_assert(SUCCEEDED(hr), "Failed to create SRV");
 }
 
 auto Texture2D::Bind(ID3D11DeviceContext* context) -> void
 {
     if (m_ResourceView != nullptr && m_SamplerState != nullptr) {
-		context->PSSetShaderResources(0, 1, &m_ResourceView);
-		context->PSSetSamplers(0, 1, &m_SamplerState);
+		context->PSSetShaderResources(0, 1, m_ResourceView.GetAddressOf());
+		context->PSSetSamplers(0, 1, m_SamplerState.GetAddressOf());
     }
 }
 

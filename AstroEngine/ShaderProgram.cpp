@@ -10,7 +10,6 @@
 #include <string>
 
 ShaderProgram::ShaderProgram(ID3D11Device* device, std::string_view filePath)
-    : m_VertexShader(nullptr), m_PixelShader(nullptr), m_InputLayout(nullptr)
 {
     m_FilePath = std::wstring(filePath.begin(), filePath.end());
 
@@ -18,12 +17,7 @@ ShaderProgram::ShaderProgram(ID3D11Device* device, std::string_view filePath)
     InitializePixelShader(device);
 }
 
-ShaderProgram::~ShaderProgram()
-{
-    if (m_VertexShader) m_VertexShader->Release();
-    if (m_PixelShader) m_PixelShader->Release();
-    if (m_InputLayout) m_InputLayout->Release();
-}
+ShaderProgram::~ShaderProgram() = default;
 
 auto ShaderProgram::InitializeVertexShader(ID3D11Device* device) -> void
 {
@@ -83,9 +77,9 @@ auto ShaderProgram::InitializePixelShader(ID3D11Device* device) -> void
 auto ShaderProgram::Bind(ID3D11DeviceContext* context) -> void
 {
     if (m_VertexShader != nullptr && m_PixelShader != nullptr) {
-        context->IASetInputLayout(m_InputLayout);
-		context->VSSetShader(m_VertexShader, nullptr, 0);
-		context->PSSetShader(m_PixelShader, nullptr, 0);
+        context->IASetInputLayout(m_InputLayout.Get());
+		context->VSSetShader(m_VertexShader.Get(), nullptr, 0);
+		context->PSSetShader(m_PixelShader.Get(), nullptr, 0);
     }
 }
 
