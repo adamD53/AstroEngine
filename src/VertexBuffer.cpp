@@ -1,12 +1,15 @@
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
 #include "VertexBuffer.h"
+
 #include "CoreUtils.h"
 
-VertexBuffer::VertexBuffer(const std::vector<Graphics::Vertex>& vertices, ID3D11Device* device, 
-    unsigned int usage, unsigned int bindFlag, unsigned int cpuFlag)
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <windows.h>
+
+VertexBuffer::VertexBuffer(
+    const std::vector<Graphics::Vertex>& vertices, ID3D11Device* device, unsigned int usage, unsigned int bindFlag,
+    unsigned int cpuFlag
+)
 {
     Utils::core_assert(vertices.empty() == false, "DirectX Vertex Buffer got an empty vertices data.");
 
@@ -16,7 +19,7 @@ VertexBuffer::VertexBuffer(const std::vector<Graphics::Vertex>& vertices, ID3D11
         .BindFlags = bindFlag,
         .CPUAccessFlags = cpuFlag
     };
-    
+
     D3D11_SUBRESOURCE_DATA initData = {};
     initData.pSysMem = vertices.data();
 

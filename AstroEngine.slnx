@@ -1,7 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Project Path="AstroEngine/AstroEngine.vcxproj" Id="75cc8f59-97d1-485d-aaae-5609ae5aaf2f" />
-</Solution>

@@ -1,13 +1,13 @@
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
 #include "ShaderProgram.h"
+
 #include "CoreUtils.h"
 
 #include <array>
+#include <d3d11.h>
+#include <d3dcompiler.h>
 #include <iostream>
 #include <string>
+#include <windows.h>
 
 ShaderProgram::ShaderProgram(ID3D11Device* device, std::string_view filePath)
 {
@@ -24,11 +24,14 @@ auto ShaderProgram::InitializeVertexShader(ID3D11Device* device) -> void
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
 
-    HRESULT hr = D3DCompileFromFile(m_FilePath.c_str(), nullptr, nullptr, "VS_Main", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
+    HRESULT hr =
+        D3DCompileFromFile(m_FilePath.c_str(), nullptr, nullptr, "VS_Main", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
 
-    if (FAILED(hr)) {
+    if (FAILED(hr))
+    {
         std::string errorMessage = "Vertex shader compilation failed.";
-        if (errorBlob) {
+        if (errorBlob)
+        {
             errorMessage += " Details: ";
             errorMessage += static_cast<char*>(errorBlob->GetBufferPointer());
             OutputDebugStringA(errorMessage.c_str());
@@ -36,18 +39,21 @@ auto ShaderProgram::InitializeVertexShader(ID3D11Device* device) -> void
         }
         Utils::core_assert(false, errorMessage);
     }
-    if (errorBlob) errorBlob->Release();
+    if (errorBlob)
+        errorBlob->Release();
 
     device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_VertexShader);
 
-    std::array<D3D11_INPUT_ELEMENT_DESC, 4> ied = { {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, (3 * sizeof(float)), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, (7 * sizeof(float)), D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "INSTANCE_POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
-    } };
+    std::array<D3D11_INPUT_ELEMENT_DESC, 4> ied = {
+        {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, (3 * sizeof(float)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, (7 * sizeof(float)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+         {"INSTANCE_POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1}}
+    };
 
-    device->CreateInputLayout(ied.data(), static_cast<UINT>(ied.size()), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &m_InputLayout);
+    device->CreateInputLayout(
+        ied.data(), static_cast<UINT>(ied.size()), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &m_InputLayout
+    );
     vsBlob->Release();
 }
 
@@ -56,11 +62,14 @@ auto ShaderProgram::InitializePixelShader(ID3D11Device* device) -> void
     ID3DBlob* psBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
 
-    HRESULT hr = D3DCompileFromFile(m_FilePath.c_str(), nullptr, nullptr, "PS_Main", "ps_5_0", 0, 0, &psBlob, &errorBlob);
+    HRESULT hr =
+        D3DCompileFromFile(m_FilePath.c_str(), nullptr, nullptr, "PS_Main", "ps_5_0", 0, 0, &psBlob, &errorBlob);
 
-    if (FAILED(hr)) {
+    if (FAILED(hr))
+    {
         std::string errorMessage = "Pixel shader compilation failed.";
-        if (errorBlob) {
+        if (errorBlob)
+        {
             errorMessage += " Details: ";
             errorMessage += static_cast<char*>(errorBlob->GetBufferPointer());
             OutputDebugStringA(errorMessage.c_str());
@@ -68,7 +77,8 @@ auto ShaderProgram::InitializePixelShader(ID3D11Device* device) -> void
         }
         Utils::core_assert(false, errorMessage);
     }
-    if (errorBlob) errorBlob->Release();
+    if (errorBlob)
+        errorBlob->Release();
 
     device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &m_PixelShader);
     psBlob->Release();
@@ -76,11 +86,10 @@ auto ShaderProgram::InitializePixelShader(ID3D11Device* device) -> void
 
 auto ShaderProgram::Bind(ID3D11DeviceContext* context) -> void
 {
-    if (m_VertexShader != nullptr && m_PixelShader != nullptr) {
+    if (m_VertexShader != nullptr && m_PixelShader != nullptr)
+    {
         context->IASetInputLayout(m_InputLayout.Get());
-		context->VSSetShader(m_VertexShader.Get(), nullptr, 0);
-		context->PSSetShader(m_PixelShader.Get(), nullptr, 0);
+        context->VSSetShader(m_VertexShader.Get(), nullptr, 0);
+        context->PSSetShader(m_PixelShader.Get(), nullptr, 0);
     }
 }
-
-

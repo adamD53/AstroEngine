@@ -1,0 +1,42 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+
+BreakBeforeBraces: Allman
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+AccessModifierOffset: -4
+
+ConstructorInitializerIndentWidth: 4
+BreakConstructorInitializers: BeforeComma
+
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignEscapedNewlines: Right
+AlignOperands: Align
+AlignTrailingComments: true
+
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+
+AlignAfterOpenBracket: BlockIndent
+
+BracedInitializerIndentWidth: 4
+
+KeepEmptyLinesAtTheStartOfBlocks: false
+AllowShortBlocksOnASingleLine: Never
+
+AlignArrayOfStructures: None
+
+Cpp11BracedListStyle: true

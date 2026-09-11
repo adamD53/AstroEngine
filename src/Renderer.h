@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-
 #include <wrl/client.h>
 
 struct HWND__;
@@ -14,10 +13,10 @@ struct ID3D11RenderTargetView;
 class Renderer
 {
 public:
-	Renderer(HWND windowNativeHandle, const uint32_t windowWidth, const uint32_t windowHeight);
+    Renderer(HWND windowNativeHandle, const uint32_t windowWidth, const uint32_t windowHeight);
     ~Renderer();
 
-	Renderer(const Renderer&) = delete;
+    Renderer(const Renderer&) = delete;
     Renderer& operator=(const Renderer&) = delete;
 
     auto GetDevice() const -> ID3D11Device* { return m_Device.Get(); }
@@ -33,4 +32,3 @@ private:
     Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_RenderTargetView;
 };
-

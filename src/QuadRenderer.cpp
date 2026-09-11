@@ -1,24 +1,27 @@
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
 #include "QuadRenderer.h"
-#include "Types.h"
-#include "VertexBuffer.h"
+
+#include "CoreUtils.h"
 #include "IndexBuffer.h"
 #include "InstanceBuffer.h"
-#include "CoreUtils.h"
+#include "Types.h"
+#include "VertexBuffer.h"
 
-#include <vector>
 #include <array>
+#include <d3d11.h>
+#include <d3dcompiler.h>
 #include <math.h>
+#include <vector>
+#include <windows.h>
 
-QuadRenderer::QuadRenderer(ID3D11Device* device, const std::vector<Graphics::Vertex>& vertices,
-    const std::vector<Graphics::InstanceData>& instances, const std::vector<unsigned int>& indices)
+QuadRenderer::QuadRenderer(
+    ID3D11Device* device, const std::vector<Graphics::Vertex>& vertices,
+    const std::vector<Graphics::InstanceData>& instances, const std::vector<unsigned int>& indices
+)
 {
     m_VertexBuffer = std::make_unique<VertexBuffer>(vertices, device, D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0);
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices, device, D3D11_USAGE_DEFAULT, D3D11_BIND_INDEX_BUFFER, 0);
-    m_InstanceBuffer = std::make_unique<InstanceBuffer>(instances, device, D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0);
+    m_InstanceBuffer =
+        std::make_unique<InstanceBuffer>(instances, device, D3D11_USAGE_DEFAULT, D3D11_BIND_VERTEX_BUFFER, 0);
 
     D3D11_BUFFER_DESC cbDesc = {
         .ByteWidth = 16,
@@ -35,7 +38,8 @@ QuadRenderer::~QuadRenderer() = default;
 
 auto QuadRenderer::UpdateTime(ID3D11DeviceContext* context, float time) -> void
 {
-    struct TimeData {
+    struct TimeData
+    {
         float time;
         std::array<float, 3> padding;
     } data;
@@ -54,13 +58,13 @@ auto QuadRenderer::UpdateTime(ID3D11DeviceContext* context, float time) -> void
 
 auto QuadRenderer::Draw(ID3D11DeviceContext* context, uint32_t maxInstances) -> void
 {
-    std::array<ID3D11Buffer*, 2> buffers = { m_VertexBuffer->GetRawBuffer(), m_InstanceBuffer->GetRawBuffer()};
-    std::array<UINT, 2> strides = { sizeof(Graphics::Vertex), sizeof(Graphics::InstanceData) };
-    std::array<UINT, 2> offsets = { 0, 0 };
-    
+    std::array<ID3D11Buffer*, 2> buffers = {m_VertexBuffer->GetRawBuffer(), m_InstanceBuffer->GetRawBuffer()};
+    std::array<UINT, 2> strides = {sizeof(Graphics::Vertex), sizeof(Graphics::InstanceData)};
+    std::array<UINT, 2> offsets = {0, 0};
+
     context->IASetVertexBuffers(0, 2, buffers.data(), strides.data(), offsets.data());
     context->IASetIndexBuffer(m_IndexBuffer->GetRawBuffer(), DXGI_FORMAT_R32_UINT, 0);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        
+
     context->DrawIndexedInstanced(6, maxInstances, 0, 0, 0);
 }
