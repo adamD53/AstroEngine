@@ -1,85 +1,49 @@
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <windows.h>
-
-#pragma warning(push, 0)
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#pragma warning(pop)
-
-#include "QuadRenderer.h"
-#include "Renderer.h"
-#include "ShaderProgram.h"
-#include "Texture2D.h"
-#include "Types.h"
-#include "Window.h"
+#include "IndexBuffer.hpp"
+#include "Renderer.hpp"
+#include "ShaderProgram.hpp"
+#include "Types.hpp"
+#include "VertexBuffer.hpp"
+#include "Window.hpp"
 
 #include <array>
+#include <cstdint>
 #include <vector>
-
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dcompiler.lib")
 
 auto main() -> int
 {
     constexpr auto windowWidth = 1280u;
     constexpr auto windowHeight = 720u;
-    constexpr auto maxInstances = 1000000u;
 
-    std::vector<Graphics::Vertex> vertices = {
-        {{-0.05f, 0.05f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-         {0.05f, 0.05f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f},
-         {0.05f, -0.05f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f},
-         {-0.05f, -0.05f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}}
+    auto window = Window(windowWidth, windowHeight, "AstroEngine");
+    auto renderer = Renderer(window.GetNativeHandle());
+
+    const auto vertices = std::array<Graphics::Vertex, 3>{
+        {{0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f},
+         {0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f},
+         {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f}}
     };
 
-    std::vector<unsigned int> indices = {0, 1, 2, 2, 3, 0};
+    const auto indices = std::vector<uint32_t>{0, 1, 2};
 
-    std::vector<Graphics::InstanceData> instances{};
-    instances.resize(maxInstances);
+    const auto vertexBuffer = VertexBuffer(renderer.GetDevice(), vertices);
+    const auto indexBuffer = IndexBuffer(renderer.GetDevice(), indices);
+    const auto shaderProgram = ShaderProgram(renderer.GetDevice(), window.GetNativeHandle(), "shaders/triangle.hlsl");
 
-    auto index = 0u;
-    for (auto y{0u}; y < (maxInstances / 1000); ++y)
+    constexpr auto clearColor = std::array<float, 4>{0.08f, 0.09f, 0.12f, 1.0f};
+
+    while (window.PollEvents())
     {
-        for (auto x{0u}; x < (maxInstances / 1000); ++x)
+        auto* renderPass = renderer.BeginFrame(clearColor);
+        if (renderPass != nullptr)
         {
-            auto finalX = (static_cast<float>(x) / 50.0f) - 1.0f;
-            auto finalY = (static_cast<float>(y) / 50.0f) - 1.0f;
+            shaderProgram.Bind(renderPass);
+            vertexBuffer.Bind(renderPass);
+            indexBuffer.Bind(renderPass);
 
-            instances[index].x = finalX;
-            instances[index].y = finalY;
-            instances[index].z = 0.0f;
+            SDL_DrawGPUIndexedPrimitives(renderPass, indexBuffer.GetIndexCount(), 1, 0, 0, 0);
 
-            index++;
+            renderer.EndFrame();
         }
-    }
-
-    Window window(windowWidth, windowHeight, "GLFW Window DirectX");
-
-    Renderer renderer(window.GetNativeHandle(), window.GetWidth(), window.GetHeight());
-
-    QuadRenderer quadMesh(renderer.GetDevice(), vertices, instances, indices);
-    instances.clear();
-
-    ShaderProgram shaders(renderer.GetDevice(), "shaders/shaders.hlsl");
-
-    Texture2D texture(renderer.GetDevice(), "assets/image.jpg");
-
-    texture.Bind(renderer.GetContext());
-    shaders.Bind(renderer.GetContext());
-
-    std::array<float, 4> clearColor = {0.1f, 0.1f, 0.1f, 1.0f};
-
-    while (window.IsOpen())
-    {
-        window.PollEvents();
-
-        renderer.BeginFrame(clearColor.data());
-
-        quadMesh.UpdateTime(renderer.GetContext(), static_cast<float>(window.GetTime()));
-        quadMesh.Draw(renderer.GetContext(), maxInstances);
-
-        renderer.EndFrame();
     }
 
     return 0;

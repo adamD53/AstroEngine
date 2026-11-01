@@ -1,30 +1,35 @@
-#include "VertexBuffer.h"
+#include "VertexBuffer.hpp"
 
-#include "CoreUtils.h"
+#include "CoreUtils.hpp"
 
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <windows.h>
-
-VertexBuffer::VertexBuffer(
-    const std::vector<Graphics::Vertex>& vertices, ID3D11Device* device, unsigned int usage, unsigned int bindFlag,
-    unsigned int cpuFlag
-)
+VertexBuffer::VertexBuffer(SDL_GPUDevice* device, const std::span<const Graphics::Vertex> vertices)
+    : m_Buffer(device, SDL_GPU_BUFFERUSAGE_VERTEX, static_cast<uint32_t>(vertices.size_bytes()))
+    , m_VertexCount(static_cast<uint32_t>(vertices.size()))
 {
-    Utils::core_assert(vertices.empty() == false, "DirectX Vertex Buffer got an empty vertices data.");
-
-    D3D11_BUFFER_DESC vertexBufferDesc = {
-        .ByteWidth = static_cast<UINT>(sizeof(Graphics::Vertex) * vertices.size()),
-        .Usage = static_cast<D3D11_USAGE>(usage),
-        .BindFlags = bindFlag,
-        .CPUAccessFlags = cpuFlag
-    };
-
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = vertices.data();
-
-    HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &initData, &m_Buffer);
-    Utils::core_assert(SUCCEEDED(hr), "DirectX Vertex Buffer failed to create.");
+    Utils::core_assert(!vertices.empty(), "VertexBuffer initialized with empty vertex span.");
+    m_Buffer.SetData(device, vertices);
 }
 
 VertexBuffer::~VertexBuffer() = default;
+
+void VertexBuffer::Bind(SDL_GPURenderPass* renderPass, const uint32_t slot) const
+{
+    Utils::core_assert(renderPass != nullptr, "VertexBuffer::Bind received null render pass.");
+
+    const auto binding = SDL_GPUBufferBinding{
+        .buffer = m_Buffer.GetRawBuffer(),
+        .offset = 0
+    };
+
+    SDL_BindGPUVertexBuffers(renderPass, slot, &binding, 1);
+}
+
+auto VertexBuffer::GetRawBuffer() const -> SDL_GPUBuffer*
+{
+    return m_Buffer.GetRawBuffer();
+}
+
+auto VertexBuffer::GetVertexCount() const -> uint32_t
+{
+    return m_VertexCount;
+}
