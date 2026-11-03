@@ -1,13 +1,13 @@
 #pragma once
 
+#include <SDL3/SDL_error.h>
 #include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_stdinc.h>
 
 #include <exception>
 #include <filesystem>
-#include <iostream>
 #include <source_location>
-#include <string>
 #include <string_view>
 
 namespace Utils
@@ -21,10 +21,16 @@ inline void core_assert(
 {
     if (!condition)
     {
-        std::cerr << "ASSERTION FAILED: " << message << "\n"
-                  << "File: " << location.file_name() << "\n"
-                  << "Line: " << location.line() << "\n"
-                  << "Function: " << location.function_name() << std::endl;
+        SDL_LogCritical(
+            SDL_LOG_CATEGORY_APPLICATION,
+            "ASSERTION FAILED: %.*s | SDL Error: %s\n  File: %s:%u (%s)",
+            static_cast<int>(message.size()),
+            message.data(),
+            SDL_GetError(),
+            location.file_name(),
+            location.line(),
+            location.function_name()
+        );
         std::terminate();
     }
 }

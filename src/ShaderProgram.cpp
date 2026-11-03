@@ -157,7 +157,7 @@ void ShaderProgram::CreatePipeline(SDL_GPUDevice* device, SDL_Window* window)
         .instance_step_rate = 0
     };
 
-    constexpr auto vertexAttributes = std::array<SDL_GPUVertexAttribute, 2>{{
+    constexpr auto vertexAttributes = std::array<SDL_GPUVertexAttribute, 3>{{
         {
             .location = 0,
             .buffer_slot = 0,
@@ -169,6 +169,12 @@ void ShaderProgram::CreatePipeline(SDL_GPUDevice* device, SDL_Window* window)
             .buffer_slot = 0,
             .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
             .offset = offsetof(Graphics::Vertex, r)
+        },
+        {
+            .location = 2,
+            .buffer_slot = 0,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+            .offset = offsetof(Graphics::Vertex, u)
         }
     }};
 

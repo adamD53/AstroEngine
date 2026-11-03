@@ -12,6 +12,19 @@
       "environment": [],
       "console": "externalTerminal",
       "preLaunchTask": "CMake: Build (Debug)"
+    },
+    {
+      "name": "Debug AstroEngine (macOS)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/AstroEngine",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb",
+      "preLaunchTask": "CMake: Build (Debug)"
     }
   ]
 }
