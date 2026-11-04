@@ -7,8 +7,11 @@
 #include "VertexBuffer.hpp"
 #include "Window.hpp"
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <array>
 #include <cstdint>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
 auto main() -> int
@@ -19,21 +22,73 @@ auto main() -> int
     auto window = Window(windowWidth, windowHeight, "AstroEngine");
     auto renderer = Renderer(window.GetNativeHandle());
 
-    const auto vertices = std::array<Graphics::Vertex, 4>{
-        {{-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
-         { 0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-         { 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-         {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f}}
+    const auto vertices = std::array<Graphics::Vertex, 24>{
+        {// Front face (+Z)
+         {-0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {-0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+         // Back face (-Z)
+         {0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {-0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+         // Left face (-X)
+         {-0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {-0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {-0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+         // Right face (+X)
+         {0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+         // Top face (+Y)
+         {-0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {-0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f},
+
+         // Bottom face (-Y)
+         {-0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f},
+         {0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f},
+         {0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+         {-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f}
+        }
     };
 
-    const auto indices = std::vector<uint32_t>{0, 1, 2, 0, 2, 3};
+    const auto indices = std::vector<uint32_t>{
+        0,  1,  2,  0,  2,  3,  // Front
+        4,  5,  6,  4,  6,  7,  // Back
+        8,  9,  10, 8,  10, 11, // Left
+        12, 13, 14, 12, 14, 15, // Right
+        16, 17, 18, 16, 18, 19, // Top
+        20, 21, 22, 20, 22, 23  // Bottom
+    };
 
     const auto vertexBuffer = VertexBuffer(renderer.GetDevice(), vertices);
     const auto indexBuffer = IndexBuffer(renderer.GetDevice(), indices);
-    const auto shaderProgram = ShaderProgram(renderer.GetDevice(), window.GetNativeHandle(), "shaders/triangle.hlsl");
+    const auto shaderProgram =
+        ShaderProgram(renderer.GetDevice(), window.GetNativeHandle(), "shaders/triangle.hlsl");
 
     const auto image = Graphics::Image("assets/image.jpg");
     const auto texture = Graphics::Texture2D(renderer.GetDevice(), image);
+
+    const auto aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+    const auto projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+    const auto view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    auto model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(25.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    const auto mvp = projection * view * model;
 
     constexpr auto clearColor = std::array<float, 4>{0.08f, 0.09f, 0.12f, 1.0f};
 
@@ -43,6 +98,7 @@ auto main() -> int
         if (renderPass != nullptr)
         {
             shaderProgram.Bind(renderPass);
+            SDL_PushGPUVertexUniformData(renderer.GetCurrentCommandBuffer(), 0, &mvp, sizeof(mvp));
             texture.Bind(renderPass, 0);
             vertexBuffer.Bind(renderPass);
             indexBuffer.Bind(renderPass);

@@ -42,6 +42,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SDL3_shadercross)
 
+set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLM_BUILD_LIBRARY OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG        1.0.1
+    GIT_SHALLOW    TRUE
+    UPDATE_COMMAND ""
+)
+FetchContent_MakeAvailable(glm)
+
 find_path(SHADERC_INCLUDE_DIR shaderc/shaderc.hpp HINTS /opt/homebrew/include /usr/local/include)
 find_library(SHADERC_LIBRARY NAMES shaderc_shared shaderc HINTS /opt/homebrew/lib /usr/local/lib)
 
@@ -62,5 +74,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     SDL3::SDL3-static
     SDL3_shadercross-static
+    glm::glm
     ${SHADERC_LIBRARY}
 )

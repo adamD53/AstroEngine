@@ -29,8 +29,13 @@ public:
     auto GetCurrentCommandBuffer() const -> SDL_GPUCommandBuffer*;
 
 private:
+    void EnsureDepthTexture(uint32_t width, uint32_t height);
+
     SDL_Window* m_Window{nullptr};
     std::unique_ptr<SDL_GPUDevice, SDLGPUDeviceDeleter> m_Device;
+    std::unique_ptr<SDL_GPUTexture, SDLGPUTextureDeleter> m_DepthTexture;
+    uint32_t m_DepthWidth{0};
+    uint32_t m_DepthHeight{0};
 
     SDL_GPUCommandBuffer* m_CurrentCommandBuffer{nullptr};
     SDL_GPURenderPass* m_CurrentRenderPass{nullptr};

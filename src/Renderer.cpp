@@ -23,6 +23,10 @@ Renderer::Renderer(SDL_Window* window)
     auto* rawDevice = SDL_CreateGPUDevice(shaderFormats, debugMode, nullptr);
     Utils::core_assert(rawDevice != nullptr, "Failed to create SDL_GPU device.");
     m_Device.reset(rawDevice);
+    m_DepthTexture = std::unique_ptr<SDL_GPUTexture, SDLGPUTextureDeleter>{
+        nullptr,
+        SDLGPUTextureDeleter{m_Device.get()}
+    };
 
     const auto claimed = SDL_ClaimWindowForGPUDevice(m_Device.get(), m_Window);
     Utils::core_assert(claimed, "Failed to claim SDL3 window for SDL_GPU device.");
@@ -64,12 +68,14 @@ auto Renderer::BeginFrame(const std::span<const float, 4> clearColor) -> SDL_GPU
     );
 
     // If window is minimized or occluded, swapchain acquisition may return false or null texture
-    if (!acquired || swapchainTexture == nullptr)
+    if (!acquired || swapchainTexture == nullptr || swapchainWidth == 0 || swapchainHeight == 0)
     {
         SDL_SubmitGPUCommandBuffer(m_CurrentCommandBuffer);
         m_CurrentCommandBuffer = nullptr;
         return nullptr;
     }
+
+    EnsureDepthTexture(swapchainWidth, swapchainHeight);
 
     const auto colorTarget = SDL_GPUColorTargetInfo{
         .texture = swapchainTexture,
@@ -85,7 +91,23 @@ auto Renderer::BeginFrame(const std::span<const float, 4> clearColor) -> SDL_GPU
         .cycle_resolve_texture = false
     };
 
-    m_CurrentRenderPass = SDL_BeginGPURenderPass(m_CurrentCommandBuffer, &colorTarget, 1, nullptr);
+    const auto depthStencilTarget = SDL_GPUDepthStencilTargetInfo{
+        .texture = m_DepthTexture.get(),
+        .clear_depth = 1.0f,
+        .load_op = SDL_GPU_LOADOP_CLEAR,
+        .store_op = SDL_GPU_STOREOP_DONT_CARE,
+        .stencil_load_op = SDL_GPU_LOADOP_DONT_CARE,
+        .stencil_store_op = SDL_GPU_STOREOP_DONT_CARE,
+        .cycle = true,
+        .clear_stencil = 0
+    };
+
+    m_CurrentRenderPass = SDL_BeginGPURenderPass(
+        m_CurrentCommandBuffer,
+        &colorTarget,
+        1,
+        &depthStencilTarget
+    );
     Utils::core_assert(m_CurrentRenderPass != nullptr, "Failed to begin SDL_GPU render pass.");
 
     const auto viewport = SDL_GPUViewport{
@@ -143,4 +165,31 @@ auto Renderer::GetCurrentRenderPass() const -> SDL_GPURenderPass*
 auto Renderer::GetCurrentCommandBuffer() const -> SDL_GPUCommandBuffer*
 {
     return m_CurrentCommandBuffer;
+}
+
+void Renderer::EnsureDepthTexture(const uint32_t width, const uint32_t height)
+{
+    if (m_DepthTexture != nullptr && m_DepthWidth == width && m_DepthHeight == height)
+    {
+        return;
+    }
+
+    const auto depthCreateInfo = SDL_GPUTextureCreateInfo{
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+        .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
+        .width = width,
+        .height = height,
+        .layer_count_or_depth = 1,
+        .num_levels = 1,
+        .sample_count = SDL_GPU_SAMPLECOUNT_1,
+        .props = 0
+    };
+
+    auto* rawDepthTexture = SDL_CreateGPUTexture(m_Device.get(), &depthCreateInfo);
+    Utils::core_assert(rawDepthTexture != nullptr, "Failed to create SDL_GPU depth texture.");
+
+    m_DepthTexture.reset(rawDepthTexture);
+    m_DepthWidth = width;
+    m_DepthHeight = height;
 }

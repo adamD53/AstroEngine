@@ -212,16 +212,16 @@ void ShaderProgram::CreatePipeline(SDL_GPUDevice* device, SDL_Window* window)
             .enable_mask = false
         },
         .depth_stencil_state = SDL_GPUDepthStencilState{
-            .compare_op = SDL_GPU_COMPAREOP_ALWAYS,
-            .enable_depth_test = false,
-            .enable_depth_write = false,
+            .compare_op = SDL_GPU_COMPAREOP_LESS,
+            .enable_depth_test = true,
+            .enable_depth_write = true,
             .enable_stencil_test = false
         },
         .target_info = SDL_GPUGraphicsPipelineTargetInfo{
             .color_target_descriptions = &colorTargetDesc,
             .num_color_targets = 1,
-            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_INVALID,
-            .has_depth_stencil_target = false
+            .depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+            .has_depth_stencil_target = true
         },
         .props = 0
     };

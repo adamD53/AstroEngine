@@ -10,12 +10,16 @@ struct VS_OUTPUT {
     float2 uv       : TEXCOORD1;
 };
 
+cbuffer UniformBlock : register(b0, space1) {
+    column_major float4x4 u_MVP;
+};
+
 Texture2D<float4> u_Texture : register(t0, space2);
 SamplerState      u_Sampler : register(s0, space2);
 
 VS_OUTPUT VS_Main(VS_INPUT input) {
     VS_OUTPUT output;
-    output.position = float4(input.position, 1.0f);
+    output.position = mul(u_MVP, float4(input.position, 1.0f));
     output.color    = input.color;
     output.uv       = input.uv;
     return output;
