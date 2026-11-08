@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_timer.h>
 #include <string>
 
@@ -49,9 +50,19 @@ auto Window::PollEvents() -> bool
         {
             m_IsOpen = false;
         }
+        else if (event.type == SDL_EVENT_WINDOW_RESIZED && event.window.windowID == myWindowID)
+        {
+            m_LogicalWidth = static_cast<uint32_t>(event.window.data1);
+            m_LogicalHeight = static_cast<uint32_t>(event.window.data2);
+        }
     }
 
     return m_IsOpen;
+}
+
+void Window::SetRelativeMouseMode(const bool enabled) const
+{
+    SDL_SetWindowRelativeMouseMode(m_Window.get(), enabled);
 }
 
 auto Window::IsOpen() const -> bool

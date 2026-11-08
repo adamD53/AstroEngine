@@ -1,3 +1,4 @@
+#include "Camera.hpp"
 #include "Image.hpp"
 #include "IndexBuffer.hpp"
 #include "Renderer.hpp"
@@ -20,6 +21,7 @@ auto main() -> int
     constexpr auto windowHeight = 720u;
 
     auto window = Window(windowWidth, windowHeight, "AstroEngine");
+    window.SetRelativeMouseMode(true);
     auto renderer = Renderer(window.GetNativeHandle());
 
     const auto vertices = std::array<Graphics::Vertex, 24>{
@@ -79,21 +81,33 @@ auto main() -> int
     const auto texture = Graphics::Texture2D(renderer.GetDevice(), image);
 
     const auto aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
-    const auto projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-    const auto view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)
-    );
+    auto camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f), aspectRatio);
 
     auto model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(25.0f), glm::vec3(1.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(-35.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-    const auto mvp = projection * view * model;
-
     constexpr auto clearColor = std::array<float, 4>{0.08f, 0.09f, 0.12f, 1.0f};
+
+    auto lastTime = window.GetTime();
 
     while (window.PollEvents())
     {
+        const auto currentTime = window.GetTime();
+        const auto deltaTime = static_cast<float>(currentTime - lastTime);
+        lastTime = currentTime;
+
+        const auto pixelSize = window.GetPixelSize();
+        if (pixelSize.width > 0 && pixelSize.height > 0)
+        {
+            camera.SetAspectRatio(
+                static_cast<float>(pixelSize.width) / static_cast<float>(pixelSize.height)
+            );
+        }
+
+        camera.Update(deltaTime);
+        const auto mvp = camera.GetViewProjectionMatrix() * model;
+
         auto* renderPass = renderer.BeginFrame(clearColor);
         if (renderPass != nullptr)
         {

@@ -21,6 +21,7 @@ public:
     auto operator=(Window&&) noexcept -> Window& = default;
 
     auto PollEvents() -> bool;
+    void SetRelativeMouseMode(bool enabled) const;
 
     auto IsOpen() const -> bool;
     auto GetNativeHandle() const -> SDL_Window*;
